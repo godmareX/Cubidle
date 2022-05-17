@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<!--
+
+		Example adapted for Daniel Rohmer tutorial
+
+		https://imagecomputing.net/damien.rohmer/teaching/2019_2020/semester_1/MPRI_2-39/practice/threejs/content/000_threejs_tutorial/index.html
+
+		J. Madeira - April 2021
+
+-->
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title> 3D scene </title>
+
+	<link rel="stylesheet" href="style.css">
+
+	<script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.138.0/build/three.module.js",
+                "GLTFLoader": "https://unpkg.com/three@0.138.0/examples/jsm/loaders/GLTFLoader.js"
+            }
+        }
+    </script>
+
+	<script type="module" src="./helper.mjs" ></script>
+	<script type="module" src="./scene.mjs" ></script>
+</head>
+
+<body>
+	<div style="width: 100%; height: 100%;">
+	<div id="Tag3DScene" style="z-index: 9; position: absolute" > </div>
+	<div id="level_menu" style="z-index: 9; position: absolute; margin: auto auto; text-align: center; top: 25%; left: 25%;visibility:hidden;background-color:darkslateblue;height: 50%; width: 50%;">
+		<div id="rates" style="width:100%;height:20%">
+			<div id="current" style="width: 50%; float:left; margin: 3% auto; color:white;">Current Rate: 1 Wood/s</div>
+			<div id="future" style="width: 50%; float:right; margin: 3% auto; color:white;">Rate after upgrade: 3 Wood/s</div>
+		</div>
+		<div id="upgrade_cost">
+			<div style="color:white">Cost to Upgrade</div>
+			<div id="woodCost" style="color:white">Wood: 10</div>
+			<div id="stoneCost" style="color:white">Stone: 30</div>
+		</div>
+		<button style="margin: 2% auto" id="UpgradeButton">Upgrade</button>
+	</div>
+	<div id="resource_list" style="z-index: 9; position: absolute;color:white; margin: 5px 5px">
+		<div id="wood">Wood: 0</div>
+		<div id="stone">Stone: 0</div>
+	</div>
+	</div>
+</body>
+
+</html>
