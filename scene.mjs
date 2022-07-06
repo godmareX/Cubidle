@@ -100,8 +100,12 @@ function onDocumentKeyUp(event) {
     }
 }
 
+var pivot = new THREE.Object3D();
+pivot.position.set(0,0,0);
+pivot.add(sceneElements.camera);
+
 let mixer
-let mixer2
+
 // Create and insert in the scene graph the models of the 3D scene
 function load3DObjects(sceneGraph) {
 
@@ -122,138 +126,49 @@ function load3DObjects(sceneGraph) {
     // Set shadow property
     planeObject.receiveShadow = true;
 
-
-    // ************************** //
-    // Create a cube (character for now)
-    // ************************** //
-    // Cube center is at (0,0,0)
-    const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+    const cubeGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
     const cubeMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(255,0,0)' });
     const cubeObject = new THREE.Mesh(cubeGeometry, cubeMaterial);
     sceneGraph.add(cubeObject);
+    cubeObject.position.y = 2;
+    cubeObject.name = "cube"
 
-    // Set position of the cube
-    // The base of the cube will be on the plane 
-    cubeObject.translateY(0.5);
-
-    // Set shadow property
-    cubeObject.castShadow = true;
-    cubeObject.receiveShadow = true;
-
-
-    // Name
-    cubeObject.name = "cube";
-    
     // Create spotlight for the cube
-
     const spotLight = new THREE.SpotLight('rgb(200, 200, 200)', 50);
     spotLight.position.set(0, 20, 0);
     sceneGraph.add(spotLight);
     spotLight.castShadow = true;
     spotLight.shadow.mapSize.width = 2048;
     spotLight.shadow.mapSize.height = 2048;
+    spotLight.shadow.camera.top = 1000
+    spotLight.shadow.camera.bottom = -1000
+    spotLight.shadow.camera.near = 1
+    spotLight.shadow.camera.far = 4000000
     spotLight.name = "light"
-    spotLight.target = cubeObject
+    spotLight.target = cubeObject;
     spotLight.penumbra = 0.75
     //sceneElements.camera.lookAt(cubeObject)
-
-    // ************************** //
-    // Create a sphere (one of the buildings)
-    // ************************** //
-    // Sphere center is at (0,0,0)
-    const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32);
-    const sphereMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(180,180,255)' });
-    const sphereObject = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    sceneGraph.add(sphereObject);
-    sphereObject.name = "sawmill"
-
-    // Set position of the sphere
-    // Move to the left and away from (0,0,0)
-    // The sphere touches the plane
-    sphereObject.translateX(-9).translateY(0.5).translateZ(6);
-
-    // Set shadow property
-    sphereObject.castShadow = true;
-
-
-    // ************************** //
-    // Create a cylinder (one of the buildings)
-    // ************************** //
-    const cylinderGeometry = new THREE.CylinderGeometry(0.2, 0.2, 1.5, 25, 1);
-    const cylinderMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(200,255,150)' });
-    const cylinderObject = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
-    sceneGraph.add(cylinderObject);
-    cylinderObject.name="masonry"
-
-    // Set position of the cylinder
-    // Move to the right and towards the camera
-    // The base of the cylinder is on the plane
-    cylinderObject.translateX(5).translateY(0.75).translateZ(-7.5);
-
-    // Set shadow property
-    cylinderObject.castShadow = true;
 
     //Create trees
     const loader = new GLTFLoader();
     loader.load(
-        "./models/tree.glb",
-
-        function(obj) {
-            sceneGraph.add(obj.scene)
-            obj.scene.position.set(-13, 0, 9)
-            obj.scene.traverse( function( node ) {
-                if ( node.isMesh ) { node.castShadow = true; node.receiveShadow = true }
-            } );
-        },
-        
-        function ( xhr ) {
-            console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
-        },
-    
-        // onError callback
-        function ( err ) {
-            console.error( 'An error happened' );
-        }
-    )
-    loader.load(
-        "./models/rock.glb",
-
-        function(obj) {
-            sceneGraph.add(obj.scene)
-            obj.scene.position.set(10, 0, -13)
-            obj.scene.traverse( function( node ) {
-                if ( node.isMesh ) { node.castShadow = true; node.receiveShadow = true}
-            } );
-        },
-        
-        function ( xhr ) {
-            console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
-        },
-    
-        // onError callback
-        function ( err ) {
-            console.error( 'An error happened' );
-        }
-    )
-    loader.load(
-        "./models/masonry.glb",
+        "./models/MainScene.glb",
 
         function(obj) {
             const model = obj.scene
+            model.position.set(0,0,0)
             sceneGraph.add(model)
-            model.position.set(5, 0, -7.5)
-            model.rotation.y += 0.961
             model.traverse( function( node ) {
-                if ( node.isMesh ) { node.castShadow = true;}
-            } );
+                if ( node.isMesh ) { node.castShadow = true;node.receiveShadow=true;}
             mixer = new THREE.AnimationMixer(model);
             const clips = obj.animations
-            const clip = THREE.AnimationClip.findByName(clips, 'hammerHit')
+            const clip = THREE.AnimationClip.findByName(clips, 'HammerHit')
             const action = mixer.clipAction(clip)
             action.play()
-            const clip2 = THREE.AnimationClip.findByName(clips, 'hammerHeadHit')
-            const action2 = mixer.clipAction(clip2)
-            action2.play()
+            const clip3 = THREE.AnimationClip.findByName(clips, 'SawRotation')
+            const action3 = mixer.clipAction(clip3)
+            action3.play()
+            } );
         },
         
         function ( xhr ) {
@@ -266,23 +181,17 @@ function load3DObjects(sceneGraph) {
         }
     )
     loader.load(
-        "./models/sawmill.glb",
+        "./models/MainCharacter.glb",
 
         function(obj) {
             const model = obj.scene
+            model.position.set(0,0,0)
             sceneGraph.add(model)
-            model.position.set(-9, 0, 6)
-            model.rotation.y += 0.937
             model.traverse( function( node ) {
-                if ( node.isMesh ) { node.castShadow = true;}
+                if ( node.isMesh ) { node.castShadow = true;node.rotation.y += 1.6}
             } );
-            mixer2 = new THREE.AnimationMixer(model);
-            const clips = obj.animations
-            const clip = THREE.AnimationClip.findByName(clips, 'SawRotation')
-            const action = mixer2.clipAction(clip)
-            action.play()
         },
-        
+
         function ( xhr ) {
             console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
         },
@@ -302,11 +211,7 @@ function load3DObjects(sceneGraph) {
 
 var delta = 0.04;
 
-var dispX = 0.1, dispZ = 0.1;
-
-var pivot = new THREE.Object3D();
-pivot.add(sceneElements.camera);
-
+var dispX = 0.2, dispZ = 0.2;
 const clock = new THREE.Clock();
 const clock2 = new THREE.Clock();
 function computeFrame(time) {
@@ -320,40 +225,47 @@ function computeFrame(time) {
 
     // CONTROLING THE CUBE WITH THE KEYBOARD
 
-    const cube = sceneElements.sceneGraph.getObjectByName("cube");
-    const sawmill = sceneElements.sceneGraph.getObjectByName("sawmill");
-    const masonry = sceneElements.sceneGraph.getObjectByName("masonry");
+    const cube = sceneElements.sceneGraph.getObjectByName("Character");
+    const sawmill = sceneElements.sceneGraph.getObjectByName("Lumber_house");
+    const masonry = sceneElements.sceneGraph.getObjectByName("Mine_house");
+    const acCube = sceneElements.sceneGraph.getObjectByName("cube");
 
 
     if (keyD) {
         cube.translateX(dispX);
         light.translateX(dispX);
         pivot.translateX(dispX);
+        acCube.translateX(dispX);
     }
     if (keyW) {
         cube.translateZ(-dispZ);
         light.translateZ(-dispZ);
         pivot.translateZ(-dispZ);
+        acCube.translateZ(-dispZ);
     }
     if (keyA) {
         cube.translateX(-dispX);
         light.translateX(-dispX);
         pivot.translateX(-dispX);
+        acCube.translateX(-dispX);
     }
     if (keyS) {
         cube.translateZ(dispZ);
         light.translateZ(dispZ);
         pivot.translateZ(dispZ);
+        acCube.translateZ(dispZ);
     }
     if (keyE){
         cube.rotation.y += -delta;
         light.rotation.y += -delta;
         pivot.rotation.y += -delta;
+        acCube.rotation.y += -delta;
     }
     if (keyQ){
         cube.rotation.y += delta;
         light.rotation.y += delta;
         pivot.rotation.y += delta;
+        acCube.rotation.y += delta;
     }
     if (keyC && pivot.position.y > -1){
         pivot.position.y -= delta;
@@ -364,11 +276,11 @@ function computeFrame(time) {
     if (keyF){
         var x=document.getElementById("level_menu");
         if (x.style.visibility==="hidden"){
-        if (Date.now() > limitF + 250 && (cube.position.distanceTo(sawmill.position) < 4 || cube.position.distanceTo(masonry.position) < 4) ){
+        if (Date.now() > limitF + 250 && (acCube.position.distanceTo(sawmill.position) < 20 || acCube.position.distanceTo(masonry.position) < 20) ){
             limitF = Date.now()
             var x=document.getElementById("level_menu");
             //figure out which building is closer
-            if(cube.position.distanceTo(sawmill.position) < cube.position.distanceTo(masonry.position)){
+            if(cube.position.distanceTo(sawmill.position) < pivot.position.distanceTo(masonry.position)){
                 //Update Menu
                 document.getElementById("current").textContent = "Current rate: " + rates.sawmill + " Wood/s"
                 document.getElementById("future").textContent = "Rate after upgrade: " + (rates.sawmill + upgradeBenefit.sawmill) + " Wood/s"
@@ -396,8 +308,8 @@ function computeFrame(time) {
         
     }
 
-    sceneElements.camera.position.y = 7.5
-    var position = new THREE.Vector3().copy( cube.position );
+    sceneElements.camera.position.y = 15
+    var position = new THREE.Vector3().copy( acCube.position );
     sceneElements.camera.lookAt( position );
 
     if (tick + 1000 < Date.now()){
@@ -409,12 +321,11 @@ function computeFrame(time) {
         wood.textContent = "Wood: " + currentRes.wood
         stone.textContent = "Stone: " + currentRes.stone
     }
+
     if(mixer){
         mixer.update(clock.getDelta());
     }
-    if(mixer2){
-        mixer2.update(clock2.getDelta());
-    }
+
     // Rendering
     helper.render(sceneElements);
 

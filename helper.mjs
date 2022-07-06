@@ -21,7 +21,7 @@ export const helper = {
         // ************************** //
         const width = window.innerWidth;
         const height = window.innerHeight;
-        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 500);
+        const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 500);
         sceneElements.camera = camera;
         camera.position.set(0, 0, 15);
         camera.lookAt(0, 0, 0);
